@@ -1,0 +1,30 @@
+[package]
+edition = "2022"
+name = "nn_backend_test"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.56"
+image = "0.24.1"
+itertools = "0.10.5"
+
+# Tract
+tract-core = "0.18.2"
+tract-onnx = "0.18.2"
+# tract = "0.16.7"
+tract-tensorflow = "0.18.2"
+
+#compiledNN
+compiled-nn = "0.10.0"
+
+#ONNX Runtime
+mcai-onnxruntime = "0.0.15"
+
+# Apache TVM
+# tvm-rt = { git = "https://github.com/apache/tvm/", branch="main"}
+# tvm-sys = { git = "https://github.com/apache/tvm/", branch="main"}
+
+# Tensorflow Lite
+tflitec = "^0.5.1"
