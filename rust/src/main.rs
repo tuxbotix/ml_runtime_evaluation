@@ -4,12 +4,10 @@ use std::{
     time::{Duration, Instant},
 };
 
-mod nn_runners;
-use crate::nn_runners::{CompiledNNRunner, Runner, TfLiteRunner, TractOnnxRunner};
+extern crate nn_backend_test;
+use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TfLiteRunner, TractOnnxRunner};
 
 // NN paths.
-const PRECLASSIFIER_PATH: &str = "../models/hulks_2022/preclassifier.hdf5";
-const POSITIONER_PATH: &str = "../models/hulks_2022/positioner.hdf5";
 
 const CLASSIFIER_PATH: &str = "../models/hulks_2022/classifier.hdf5";
 const CLASSIFIER_PATH_ONNX: &str = "../models/hulks_2022/classifier.onnx";
@@ -69,20 +67,17 @@ fn main() {
     for (runner_name, (runner, result_and_duration_list)) in runner_result_map.iter_mut() {
         let start: Instant = Instant::now();
 
-        let result = runner
-            .as_mut()
-            .run_inference_single_io(&input_buffer)
-            .clone();
+        let result = runner.as_mut().run_inference_single_io(&input_buffer);
         result_and_duration_list.push((result, start.elapsed()));
 
-        let average_duration = get_average_duration(&result_and_duration_list).as_micros();
+        let average_duration = get_average_duration(result_and_duration_list).as_micros();
         println!("Average runtime of:{runner_name} = {average_duration}us");
     }
 
     // println!("tractResultList: {:?}", tract_result_list);
 }
 
-fn get_average_duration(result_and_duration_list: &Vec<(&[f32], Duration)>) -> Duration {
+fn get_average_duration(result_and_duration_list: &[(&[f32], Duration)]) -> Duration {
     result_and_duration_list
         .iter()
         .map(|(_, duration)| duration)

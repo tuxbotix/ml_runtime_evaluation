@@ -27,10 +27,7 @@ impl Runner for CompiledNNRunner {
             "Input buffer is larger than the input available for compiledNN!"
         );
 
-        // copy data
-        for index in 0..nn_input.len() {
-            nn_input[index] = input_buffer[index];
-        }
+        nn_input.copy_from_slice(&input_buffer[..nn_input.len()]);
 
         // perform inference
         self.network_executor.apply();

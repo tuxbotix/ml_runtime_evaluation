@@ -1,5 +1,5 @@
 [package]
-edition = "2022"
+edition = "2021"
 name = "nn_backend_test"
 version = "0.1.0"
 
@@ -20,7 +20,7 @@ tract-tensorflow = "0.18.2"
 compiled-nn = "0.10.0"
 
 #ONNX Runtime
-mcai-onnxruntime = "0.0.15"
+# mcai-onnxruntime = "0.0.15"
 
 # Apache TVM
 # tvm-rt = { git = "https://github.com/apache/tvm/", branch="main"}
@@ -28,3 +28,10 @@ mcai-onnxruntime = "0.0.15"
 
 # Tensorflow Lite
 tflitec = "^0.5.1"
+
+[dev-dependencies]
+criterion = "0.4"
+
+[[bench]]
+name = "benchmark"
+harness = false

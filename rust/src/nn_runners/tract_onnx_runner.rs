@@ -1,16 +1,18 @@
-use std::time::Instant;
-
-use super::runner_traits::Runner;
 use tract_core::internal::*;
 use tract_onnx::prelude::*;
 
+use super::runner_traits::Runner;
+
+type SimplePlanTyped = SimplePlan<
+    TypedFact,
+    Box<dyn TypedOp>,
+    tract_onnx::prelude::Graph<TypedFact, Box<dyn TypedOp>>,
+>;
+
+#[derive(Clone)]
 pub struct TractOnnxRunner {
     // model:TypedModel,
-    model: SimplePlan<
-        TypedFact,
-        Box<dyn TypedOp>,
-        tract_onnx::prelude::Graph<TypedFact, Box<dyn TypedOp>>,
-    >,
+    model: SimplePlanTyped,
     output: Vec<f32>,
 }
 
@@ -57,7 +59,7 @@ impl TractOnnxRunner {
                     .reduce(std::ops::Mul::mul)
                     .unwrap()
             ];
-            runner.run_inference_single_io(&vec.as_slice());
+            runner.run_inference_single_io(vec.as_slice());
         }
         Ok(runner)
     }
@@ -77,7 +79,7 @@ impl Runner for TractOnnxRunner {
 
         let tensor: Tensor = Tensor::from_shape(shape, input_buffer).unwrap();
 
-        let result = self.model.run(tvec![tensor.into()]).unwrap();
+        let result = self.model.run(tvec![tensor]).unwrap();
 
         let result_slice = &result[input_output_index].as_slice().unwrap();
 
