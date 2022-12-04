@@ -1,5 +1,12 @@
 # Evaluating runtime performance of Neural Network inference backends
 
+## Tested backends/ libraries
+
+* TensorFlow Lite https://tensorflow.org
+* CompiledNN https://github.com/bhuman/CompiledNN
+* Tract https://github.com/sonos/tract
+* WIP: Apache TVM https://tvm.apache.org/
+
 ## Rust
 
 ```bash
@@ -10,9 +17,9 @@ cargo build
 
 # Benchmark
 cargo bench
-```
-Example output for benchmarking:
-```bash
+
+# Example output for benchmarking:
+
 NN Runner/CompiledNNRunner/../data/ball_sample.png
                         time:   [47.885 µs 48.143 µs 48.418 µs]
                         change: [-7.9907% -5.5533% -3.4340%] (p = 0.00 < 0.05)
@@ -42,7 +49,7 @@ WIP
 
 ## Cross compiling
 
-With Yocto or other CMake, Cargo friendly methods, this should work out of the box in general.
+If you already have a working yocto SDK with support for Rust and Cmake (for C++):
 
 ```
 source ___ # yocto environment setup
@@ -54,3 +61,6 @@ cargo build
 For a yocto toolchain with a `x86_64-aldebaran-linux-gnu` identifier, results are found in `rust/target/x86_64-aldebaran-linux-gnu`.
 
 Tested with toolchain of [HULKs](https://github.com/hulks/hulk). `tflitec` dependency doesn't work due to its dependency in bazel build (unless we supply libtensorflow_lite_c.so)
+
+**Note** `tflitec` dependency might not work out of the box when cross compiling as it uses Tensorflow's bazel build which isn't always trivial to setup for crosscompiling.
+In this case, you can build tflite (TensorFlow Lite) seperately and pass the build and .so path [See documentation here](https://docs.rs/tflitec/latest/tflitec/).
