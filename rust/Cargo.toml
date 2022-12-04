@@ -33,5 +33,5 @@ tflitec = "^0.5.1"
 criterion = "0.4"
 
 [[bench]]
-name = "benchmark"
 harness = false
+name = "benchmark"
