@@ -60,7 +60,5 @@ cargo build
 
 For a yocto toolchain with a `x86_64-aldebaran-linux-gnu` identifier, results are found in `rust/target/x86_64-aldebaran-linux-gnu`.
 
-Tested with toolchain of [HULKs](https://github.com/hulks/hulk). `tflitec` dependency doesn't work due to its dependency in bazel build (unless we supply libtensorflow_lite_c.so)
-
-**Note** `tflitec` dependency might not work out of the box when cross compiling as it uses Tensorflow's bazel build which isn't always trivial to setup for crosscompiling.
+Tested with toolchain of [HULKs](https://github.com/hulks/hulk). `tflitec` dependency doesn't work due to it using bazel for building tensorflow which makes it not so trivial to cross compile.
 In this case, you can build tflite (TensorFlow Lite) seperately and pass the build and .so path [See documentation here](https://docs.rs/tflitec/latest/tflitec/).
