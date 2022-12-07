@@ -5,11 +5,8 @@ use pprof::criterion::{Output, PProfProfiler};
 extern crate nn_backend_test;
 use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunner};
 
-cfg_if::cfg_if! {
-if #[cfg(not(nao))] {
+#[cfg(tflitec)]
 use crate::nn_backend_test::nn_runners::TfLiteRunner;
-}
-}
 
 const CLASSIFIER_PATH: &str = "../models/hulks_2022/classifier.hdf5";
 const CLASSIFIER_PATH_ONNX: &str = "../models/hulks_2022/classifier.onnx";

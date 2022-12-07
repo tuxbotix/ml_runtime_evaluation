@@ -36,7 +36,8 @@ criterion = "0.4"
 pprof = {version = "0.11", features = ["flamegraph", "criterion"]}
 
 [features]
-default = ["dep:tflitec"]
+default = []
+tflite = ["dep:tflitec"]
 nao = []
 
 [[bench]]

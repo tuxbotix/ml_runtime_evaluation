@@ -48,7 +48,6 @@ impl TractOnnxRunner {
             .unwrap();
 
         let input_len = input_shape
-            .clone()
             .iter()
             .copied()
             .reduce(std::ops::Mul::mul)

@@ -1,4 +1,7 @@
-#[cfg(not(nao))]
+// tflitec library has issues with cross compiling via Bazel right now.
+// Until this is fixed, only host will be used.
+cfg_if::cfg_if! {
+if #[cfg(tflite)] {
 
 use tflitec::interpreter::{Interpreter, Options};
 use tflitec::model::Model;
@@ -74,4 +77,7 @@ impl Runner for TfLiteRunner {
         self.current_first_output.copy_from_slice(tensor.data());
         self.current_first_output.as_slice()
     }
+}
+
+}
 }

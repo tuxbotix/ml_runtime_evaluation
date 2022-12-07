@@ -7,17 +7,14 @@ use std::{
 extern crate nn_backend_test;
 use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunner};
 
-cfg_if::cfg_if! {
-if #[cfg(not(nao))] {
-    use crate::nn_backend_test::nn_runners::TfLiteRunner;
-}
-}
+#[cfg(tflite)]
+use crate::nn_backend_test::nn_runners::TfLiteRunner;
 
 // NN paths.
 
 const CLASSIFIER_PATH: &str = "../models/hulks_2022/classifier.hdf5";
 const CLASSIFIER_PATH_ONNX: &str = "../models/hulks_2022/classifier.onnx";
-const CLASSIFIER_PATH_TFLITE: &str = "../models/hulks_2022/classifier.tflite";
+const _CLASSIFIER_PATH_TFLITE: &str = "../models/hulks_2022/classifier.tflite";
 
 const BALL_SAMPLE_PATH: &str = "../data/ball_sample.png";
 
@@ -32,7 +29,7 @@ fn main() {
 
     // options used by different backends
     let input_shape = [32, 32, 1];
-    let thread_count = 1;
+    let _thread_count = 1;
 
     //
     let mut runner_result_map: HashMap<&str, RunnerAndResults> = HashMap::new();
@@ -59,15 +56,16 @@ fn main() {
     //         Default::default(),
     //     ),
     // );
+
     cfg_if::cfg_if! {
-            if #[cfg(not(nao))] {
-        runner_result_map.insert(
-            "tflite",
-            (
-                Box::new(TfLiteRunner::new(CLASSIFIER_PATH_TFLITE, thread_count).unwrap()),
-                Default::default(),
-            ),
-        );
+        if #[cfg(tflite)] {
+            runner_result_map.insert(
+                "tflite",
+                (
+                    Box::new(TfLiteRunner::new(_CLASSIFIER_PATH_TFLITE, _thread_count).unwrap()),
+                    Default::default(),
+                ),
+            );
     }}
 
     println!("Runners are setup");
