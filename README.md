@@ -7,7 +7,7 @@
 * Tract https://github.com/sonos/tract
 * WIP: Apache TVM https://tvm.apache.org/
 
-## Rust
+## How-To: Rust
 
 ```bash
 cd rust/
@@ -18,7 +18,7 @@ cargo build
 # Benchmark
 cargo bench
 
-# Example output for benchmarking:
+# Example output for benchmarking on a T490 laptop.
 
 NN Runner/CompiledNNRunner/../data/ball_sample.png
                         time:   [47.885 µs 48.143 µs 48.418 µs]
@@ -43,7 +43,7 @@ Found 6 outliers among 100 measurements (6.00%)
   
 ```
 
-## C++
+## How-To: C++
 
 WIP
 
