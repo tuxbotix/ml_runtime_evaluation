@@ -80,9 +80,7 @@ impl Runner for TractOnnxRunner {
             .unwrap()
             .copy_from_slice(input_buffer);
 
-        let start: Instant = Instant::now();
         let result = self.model.run(tvec![self.input_tensor.clone()]).unwrap();
-        println!("Runtime of:= {:?}", start.elapsed());
 
         let result_slice = &result[input_output_index].as_slice().unwrap();
 

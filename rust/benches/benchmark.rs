@@ -1,16 +1,16 @@
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
 use itertools::Itertools;
 use pprof::criterion::{Output, PProfProfiler};
 
 extern crate nn_backend_test;
 use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunner};
 
-#[cfg(tflitec)]
+#[cfg(tflite)]
 use crate::nn_backend_test::nn_runners::TfLiteRunner;
 
 const CLASSIFIER_PATH: &str = "../models/hulks_2022/classifier.hdf5";
 const CLASSIFIER_PATH_ONNX: &str = "../models/hulks_2022/classifier.onnx";
-const CLASSIFIER_PATH_TFLITE: &str = "../models/hulks_2022/classifier.tflite";
+const _CLASSIFIER_PATH_TFLITE: &str = "../models/hulks_2022/classifier.tflite";
 
 const BALL_SAMPLE_PATH: &str = "../data/ball_sample.png";
 
@@ -23,7 +23,7 @@ fn criterion_benchmark(c: &mut Criterion) {
 
     // options used by different backends
     let input_shape = [32, 32, 1];
-    let thread_count = 1;
+    let _thread_count = 1;
 
     let mut group = c.benchmark_group("NN Runner");
 
@@ -54,14 +54,14 @@ fn criterion_benchmark(c: &mut Criterion) {
     );
 
     cfg_if::cfg_if! {
-        if #[cfg(not(nao))] {
+        if #[cfg(tflite)] {
             group.bench_with_input(
                 BenchmarkId::new("TfLiteRunner", BALL_SAMPLE_PATH),
                 &input_buffer,
                 |b, input_buffer| {
                     b.iter_batched_ref(
                         || -> TfLiteRunner {
-                            TfLiteRunner::new(CLASSIFIER_PATH_TFLITE, thread_count).unwrap()
+                            TfLiteRunner::new(_CLASSIFIER_PATH_TFLITE, _thread_count).unwrap()
                         },
                         |runner| runner.run_inference_single_io(input_buffer).len(),
                         BatchSize::SmallInput,
