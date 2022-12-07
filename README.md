@@ -62,3 +62,7 @@ For a yocto toolchain with a `x86_64-aldebaran-linux-gnu` identifier, results ar
 
 Tested with toolchain of [HULKs](https://github.com/hulks/hulk). `tflitec` dependency doesn't work due to it using bazel for building tensorflow which makes it not so trivial to cross compile.
 In this case, you can build tflite (TensorFlow Lite) seperately and pass the build and .so path [See documentation here](https://docs.rs/tflitec/latest/tflitec/).
+
+## Acknowledgements
+
+This project was inspired with neccesities I faced with some personal projects, work and working with [HULKs](https://hulks.de) - RoboCup SPL team of TU Hamburg.
