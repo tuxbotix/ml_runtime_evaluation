@@ -5,7 +5,13 @@ use std::{
 };
 
 extern crate nn_backend_test;
-use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TfLiteRunner, TractOnnxRunner};
+use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunner};
+
+cfg_if::cfg_if! {
+if #[cfg(not(nao))] {
+    use crate::nn_backend_test::nn_runners::TfLiteRunner;
+}
+}
 
 // NN paths.
 
@@ -53,13 +59,16 @@ fn main() {
     //         Default::default(),
     //     ),
     // );
-    runner_result_map.insert(
-        "tflite",
-        (
-            Box::new(TfLiteRunner::new(CLASSIFIER_PATH_TFLITE, thread_count).unwrap()),
-            Default::default(),
-        ),
-    );
+    cfg_if::cfg_if! {
+            if #[cfg(not(nao))] {
+        runner_result_map.insert(
+            "tflite",
+            (
+                Box::new(TfLiteRunner::new(CLASSIFIER_PATH_TFLITE, thread_count).unwrap()),
+                Default::default(),
+            ),
+        );
+    }}
 
     println!("Runners are setup");
 

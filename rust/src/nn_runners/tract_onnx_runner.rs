@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use tract_core::internal::*;
 use tract_onnx::prelude::*;
 
@@ -14,6 +16,8 @@ pub struct TractOnnxRunner {
     // model:TypedModel,
     model: SimplePlanTyped,
     output: Vec<f32>,
+    // input_shape: Vec<usize>,
+    input_tensor: Tensor,
 }
 
 impl TractOnnxRunner {
@@ -43,22 +47,25 @@ impl TractOnnxRunner {
             .reduce(std::ops::Mul::mul)
             .unwrap();
 
+        let input_len = input_shape
+            .clone()
+            .iter()
+            .copied()
+            .reduce(std::ops::Mul::mul)
+            .unwrap();
+
+        let input_tensor = Tensor::from_shape(input_shape, vec![0.0f32; input_len].as_slice());
+
         let mut runner = Self {
             model,
             output: vec![0.0f32; output_len],
+            input_tensor: input_tensor.unwrap(),
         };
 
         // Dummy run for first time.
         {
             // Create input
-            let vec = vec![
-                0.0f32;
-                input_shape
-                    .iter()
-                    .copied()
-                    .reduce(std::ops::Mul::mul)
-                    .unwrap()
-            ];
+            let vec = vec![0.0f32; input_len];
             runner.run_inference_single_io(vec.as_slice());
         }
         Ok(runner)
@@ -68,18 +75,15 @@ impl TractOnnxRunner {
 impl Runner for TractOnnxRunner {
     fn run_inference_single_io(&mut self, input_buffer: &[f32]) -> &[f32] {
         let input_output_index = 0;
-        let shape = self
-            .model
-            .model
-            .input_fact(input_output_index)
+
+        self.input_tensor
+            .as_slice_mut()
             .unwrap()
-            .shape
-            .as_concrete()
-            .unwrap();
+            .copy_from_slice(input_buffer);
 
-        let tensor: Tensor = Tensor::from_shape(shape, input_buffer).unwrap();
-
-        let result = self.model.run(tvec![tensor]).unwrap();
+        let start: Instant = Instant::now();
+        let result = self.model.run(tvec![self.input_tensor.clone()]).unwrap();
+        println!("Runtime of:= {:?}", start.elapsed());
 
         let result_slice = &result[input_output_index].as_slice().unwrap();
 

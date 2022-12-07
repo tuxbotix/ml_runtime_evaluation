@@ -1,8 +1,15 @@
 use criterion::{black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
 use itertools::Itertools;
+use pprof::criterion::{Output, PProfProfiler};
 
 extern crate nn_backend_test;
-use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TfLiteRunner, TractOnnxRunner};
+use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunner};
+
+cfg_if::cfg_if! {
+if #[cfg(not(nao))] {
+use crate::nn_backend_test::nn_runners::TfLiteRunner;
+}
+}
 
 const CLASSIFIER_PATH: &str = "../models/hulks_2022/classifier.hdf5";
 const CLASSIFIER_PATH_ONNX: &str = "../models/hulks_2022/classifier.onnx";
@@ -24,7 +31,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("NN Runner");
 
     group.bench_with_input(
-        BenchmarkId::new("CompiledNNRunner", BALL_SAMPLE_PATH),
+        BenchmarkId::new("CompiledNNRunner", "ball"),
         &input_buffer,
         |b, input_buffer| {
             b.iter_batched_ref(
@@ -36,7 +43,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     );
 
     group.bench_with_input(
-        BenchmarkId::new("TractOnnxRunner", BALL_SAMPLE_PATH),
+        BenchmarkId::new("TractOnnxRunner", "ball"),
         &input_buffer,
         |b, input_buffer| {
             b.iter_batched_ref(
@@ -49,20 +56,29 @@ fn criterion_benchmark(c: &mut Criterion) {
         },
     );
 
-    group.bench_with_input(
-        BenchmarkId::new("TfLiteRunner", BALL_SAMPLE_PATH),
-        &input_buffer,
-        |b, input_buffer| {
-            b.iter_batched_ref(
-                || -> TfLiteRunner {
-                    TfLiteRunner::new(CLASSIFIER_PATH_TFLITE, thread_count).unwrap()
+    cfg_if::cfg_if! {
+        if #[cfg(not(nao))] {
+            group.bench_with_input(
+                BenchmarkId::new("TfLiteRunner", BALL_SAMPLE_PATH),
+                &input_buffer,
+                |b, input_buffer| {
+                    b.iter_batched_ref(
+                        || -> TfLiteRunner {
+                            TfLiteRunner::new(CLASSIFIER_PATH_TFLITE, thread_count).unwrap()
+                        },
+                        |runner| runner.run_inference_single_io(input_buffer).len(),
+                        BatchSize::SmallInput,
+                    )
                 },
-                |runner| runner.run_inference_single_io(input_buffer).len(),
-                BatchSize::SmallInput,
-            )
-        },
-    );
+            );
+        }
+    }
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group! {
+    name = benches;
+    config = Criterion::default().with_profiler(PProfProfiler::new(100, Output::Flamegraph(None)));
+    targets = criterion_benchmark
+}
+
 criterion_main!(benches);

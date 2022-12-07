@@ -1,3 +1,5 @@
+#[cfg(not(nao))]
+
 use tflitec::interpreter::{Interpreter, Options};
 use tflitec::model::Model;
 use tflitec::tensor::{self, DataType};
