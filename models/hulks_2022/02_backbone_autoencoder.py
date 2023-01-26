@@ -170,19 +170,7 @@ new_autoencoder.fit(
 
 #%%
 val = dataset_images_only[0].as_numpy_iterator().next()[0]
-print(val.shape)
-# with Image.open(
-#     os.path.join(
-#         script_path,
-#         "../../data/01024_GermanOpen2019_HULKs_Sabretooth-2nd_52240197_upper-002.png",
-#     )
-# ) as im:
 
-# width, height order
-# resized = im.resize((image_as_mat_size[1], image_as_mat_size[0]))
-# a = np.expand_dims(np.asarray(resized,dtype=float)[:, :, 0:1],0) / 255.0
-# print(a.shape, np.max(a.flatten()))
-# out = new_autoencoder(a)
 enc_out = new_encoder(val)
 
 plt.figure()

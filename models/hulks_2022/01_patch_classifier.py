@@ -48,19 +48,10 @@ for idx, layer in enumerate(model.layers):
 
 dense_layer = model.layers[last_dense_layer_idx]
 
+# Get the layer config and update units
 layer_config = dense_layer.get_config()
 layer_config["units"] = num_classes
-# new_dense = tf.keras.layers.Dense(
-#     name=dense_layer.name,
-#     units=num_classes,
-#     activation=dense_layer.activation,
-#     use_bias=dense_layer.use_bias,
-#     # kernel_initializer=dense_layer.kernel_initializer,
-#     # bias_initializer=dense_layer.bias_initializer,
-#     kernel_constraint=dense_layer.kernel_constraint,
-#     bias_constraint=dense_layer.bias_constraint,
-# )
-new_dense = tf.keras.layers.Dense(**layer_config)
+new_dense = dense_layer.from_config(layer_config)
 
 #%%
 
