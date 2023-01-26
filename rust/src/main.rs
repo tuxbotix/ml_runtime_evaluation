@@ -7,7 +7,7 @@ use std::{
 extern crate nn_backend_test;
 use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunner};
 
-#[cfg(tflite)]
+#[cfg(feature = "tflite")]
 use crate::nn_backend_test::nn_runners::TfLiteRunner;
 
 // NN paths.
@@ -58,7 +58,7 @@ fn main() {
     // );
 
     cfg_if::cfg_if! {
-        if #[cfg(tflite)] {
+        if #[cfg(feature="tflite")] {
             runner_result_map.insert(
                 "tflite",
                 (

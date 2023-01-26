@@ -34,4 +34,12 @@ impl Runner for CompiledNNRunner {
 
         self.network_executor.output(input_output_index)
     }
+
+    fn get_input_shape(&self, _index: usize) -> Vec<usize> {
+        todo!();
+    }
+
+    fn get_output_shape(&self, _index: usize) -> Vec<usize> {
+        todo!();
+    }
 }

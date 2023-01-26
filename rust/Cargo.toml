@@ -12,10 +12,10 @@ image = "0.24.1"
 itertools = "0.10.5"
 
 # Tract
-tract-core = "0.18.2"
-tract-onnx = "0.18.2"
+tract-core = "^0.19.0"
+tract-onnx = "^0.19.0"
 # tract = "0.16.7"
-tract-tensorflow = "0.18.2"
+tract-tensorflow = "^0.19.0"
 
 #compiledNN
 compiled-nn = "0.10.0"
@@ -28,7 +28,7 @@ compiled-nn = "0.10.0"
 # tvm-sys = { git = "https://github.com/apache/tvm/", branch="main"}
 
 # Tensorflow Lite
-tflitec = {version = "^0.5.1", optional = true}
+tflitec = {version = "^0.5.2", optional = true, features = ["xnnpack"]}
 
 [dev-dependencies]
 criterion = "0.4"
@@ -37,8 +37,8 @@ pprof = {version = "0.11", features = ["flamegraph", "criterion"]}
 
 [features]
 default = []
-tflite = ["dep:tflitec"]
 nao = []
+tflite = ["dep:tflitec"]
 
 [[bench]]
 harness = false

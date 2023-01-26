@@ -1,6 +1,5 @@
-use std::time::Instant;
-
 use tract_core::internal::*;
+use tract_itertools::Itertools;
 use tract_onnx::prelude::*;
 
 use super::runner_traits::Runner;
@@ -26,9 +25,11 @@ impl TractOnnxRunner {
             .model_for_path(network_path_onnx)?
             // specify input type and shape
             .with_input_fact(0, f32::fact(input_shape).into())?
-            // this model hardcodes a "1" as batch output shape, erase the output shape
-            // to let tract perform inference and find "N"
+            // Let tract perform inference and find "N"
             .with_output_fact(0, InferenceFact::default())?
+            .eliminate_dead_branches()?
+            .into_typed()?
+            .into_compact()?
             // optimize the model
             .into_optimized()?
             // make the model runnable and fix its inputs and outputs
@@ -47,13 +48,22 @@ impl TractOnnxRunner {
             .reduce(std::ops::Mul::mul)
             .unwrap();
 
-        let input_len = input_shape
+        let input_shape_computed = model
+            .model
+            .input_fact(0)
+            .unwrap()
+            .shape
+            .as_concrete()
+            .unwrap();
+
+        let input_len = input_shape_computed
             .iter()
             .copied()
             .reduce(std::ops::Mul::mul)
             .unwrap();
 
-        let input_tensor = Tensor::from_shape(input_shape, vec![0.0f32; input_len].as_slice());
+        let input_tensor =
+            Tensor::from_shape(input_shape_computed, vec![0.0f32; input_len].as_slice());
 
         let mut runner = Self {
             model,
@@ -80,7 +90,10 @@ impl Runner for TractOnnxRunner {
             .unwrap()
             .copy_from_slice(input_buffer);
 
-        let result = self.model.run(tvec![self.input_tensor.clone()]).unwrap();
+        let result = self
+            .model
+            .run(tvec![self.input_tensor.clone().into()])
+            .unwrap();
 
         let result_slice = &result[input_output_index].as_slice().unwrap();
 
@@ -91,5 +104,31 @@ impl Runner for TractOnnxRunner {
 
         self.output.copy_from_slice(result_slice);
         &self.output
+    }
+
+    fn get_input_shape(&self, index: usize) -> Vec<usize> {
+        self.model
+            .model
+            .input_fact(index)
+            .unwrap()
+            .shape
+            .as_concrete()
+            .unwrap()
+            .iter()
+            .copied()
+            .collect_vec()
+    }
+
+    fn get_output_shape(&self, index: usize) -> Vec<usize> {
+        self.model
+            .model
+            .output_fact(index)
+            .unwrap()
+            .shape
+            .as_concrete()
+            .unwrap()
+            .iter()
+            .copied()
+            .collect_vec()
     }
 }
