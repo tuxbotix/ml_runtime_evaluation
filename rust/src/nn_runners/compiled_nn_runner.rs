@@ -20,19 +20,21 @@ impl Runner for CompiledNNRunner {
     fn run_inference_single_io(&mut self, input_buffer: &[f32]) -> &[f32] {
         let input_output_index = 0;
 
-        let nn_input: &mut [f32] = self.network_executor.input(input_output_index);
+        let nn_input: compiled_nn::TensorMut = self.network_executor.input_mut(input_output_index);
 
         assert!(
-            input_buffer.len() <= nn_input.len(),
+            input_buffer.len() <= nn_input.data.len(),
             "Input buffer is larger than the input available for compiledNN!"
         );
 
-        nn_input.copy_from_slice(&input_buffer[..nn_input.len()]);
+        nn_input
+            .data
+            .copy_from_slice(&input_buffer[..nn_input.data.len()]);
 
         // perform inference
         self.network_executor.apply();
 
-        self.network_executor.output(input_output_index)
+        self.network_executor.output(input_output_index).data
     }
 
     fn get_input_shape(&self, _index: usize) -> Vec<usize> {
