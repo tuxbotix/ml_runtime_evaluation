@@ -373,7 +373,10 @@ def main():
     new_decoder = get_simple_decoder(new_backbone, 0.25)
 
     new_autoencoder = get_new_autoencoder(
-        args.train_backbone, new_backbone, new_decoder
+        args.train_backbone,
+        new_backbone,
+        new_decoder,
+        {"optimizer": "adam", "loss": "binary_crossentropy"},
     )
 
     tf.keras.models.save_model(
@@ -413,18 +416,13 @@ def main():
     trained_encoder.trainable = False
     trained_encoder.finalize_state()
 
-    tf.keras.models.save_model(
-        new_autoencoder, os.path.join(args.out, "autoencoder_saved_model/")
+    autoencoder_saved_model_path = os.path.join(args.out, "autoencoder_saved_model/")
+    trained_encoder_saved_model_path = os.path.join(
+        args.out, "trained_encoder_saved_model/"
     )
-    tf.keras.models.save_model(
-        new_autoencoder, os.path.join(args.out, "autoencoder.hdf5")
-    )
-    tf.keras.models.save_model(
-        trained_encoder, os.path.join(args.out, "trained_encoder_saved_model/")
-    )
-    tf.keras.models.save_model(
-        trained_encoder, os.path.join(args.out, "trained_encoder.hdf5")
-    )
+    tf.keras.models.save_model(new_autoencoder, autoencoder_saved_model_path)
+    tf.keras.models.save_model(trained_encoder, trained_encoder_saved_model_path)
+
     show_simple_results(
         trained_encoder,
         new_autoencoder,
@@ -433,6 +431,14 @@ def main():
         args.out,
         "trained",
     )
+
+    autoencoder_hdf5_path = os.path.join(args.out, "autoencoder.hdf5")
+    trained_encoder_hdf5_path = os.path.join(args.out, "trained_encoder.hdf5")
+    # os.remove(autoencoder_hdf5_path)
+    # os.remove(trained_encoder_hdf5_path)
+
+    # tf.keras.models.save_model(new_autoencoder, autoencoder_hdf5_path)
+    # tf.keras.models.save_model(trained_encoder, trained_encoder_hdf5_path)
 
 
 if __name__ == "__main__":
