@@ -181,37 +181,65 @@ def get_new_autoencoder(
 
 # %%
 def setup_dataset(
-    image_size_row_col,
+    image_shape,
     image_directory: os.PathLike,
     batch_size: int,
+    seed: int,
+    get_yuv: bool = False,
+    get_grayscale: bool = True,
     regularize: bool = True,
+    augment: bool = False,
     dataset_parameters: dict = {
         "labels": None,
         # "validation_split": 0.0,
         # "subset": "training",
-        "seed": 123,
         "shuffle": True,
     },
 ) -> tf.data.Dataset:
     # Dataset ..
     print("Setting up dataset")
+    channels = image_shape[2]
+    if get_grayscale and channels != 1:
+        print(
+            "Requested grayscale, but channel count needed is 1!. Ignoring grayscale conversion"
+        )
+    get_grayscale = get_grayscale and channels == 1
+
+    data_augmentation = tf.keras.Sequential(
+        [
+            tf.keras.layers.RandomFlip("horizontal_and_vertical", seed=seed),
+            tf.keras.layers.RandomRotation(0.2, seed=seed),
+        ]
+    )
 
     def add_rd_targets(image):
         """
         Training is unsupervised, so labels aren't necessary here. However, we
         need to add "dummy" targets for rate and distortion.
         """
-        regularized = image[0, :, :, 0:1] / 255.0 if regularize else image[0, :, :, 0:1]
-        # regularized = image[0, :, :, 0:1]
-        return regularized, regularized
+        if regularize:
+            image = image / 255.0
+        if get_yuv and not get_grayscale:
+            image = tf.image.rgb_to_yuv(image)
+        elif get_grayscale:
+            image = tf.image.rgb_to_grayscale(image)
+        if augment:
+            image = data_augmentation(image)
+        image = image[0, :, :, 0:channels]
+        return image, image
 
     dataset_parameters["directory"] = image_directory
-    dataset_parameters["image_size"] = image_size_row_col
+    dataset_parameters["image_size"] = (image_shape[0], image_shape[1])
     dataset_parameters["batch_size"] = batch_size
+    dataset_parameters["seed"] = seed
     dataset_images_only: tf.data.Dataset = tf.keras.utils.image_dataset_from_directory(
         **dataset_parameters
     )
-    return dataset_images_only.map(add_rd_targets).batch(batch_size).prefetch(8)
+    return (
+        dataset_images_only.map(add_rd_targets)
+        .batch(batch_size)
+        .prefetch(buffer_size=tf.data.AUTOTUNE)
+    )
 
 
 #%%
@@ -301,7 +329,7 @@ def main():
     parser.add_argument(
         "--train_backbone", help="train_backbone", type=bool, default=True
     )
-    parser.add_argument("--batch_size", help="batch_size", type=int, default=8)
+    parser.add_argument("--batch_size", help="batch_size", type=int, default=4)
     parser.add_argument(
         "--gpu_memory_limit",
         help="max memory to be used by each GPU",
@@ -313,7 +341,15 @@ def main():
         "--input_shape",
         help="new input shape, (height, width, channels)",
         type=list[int],
-        default=[120, 180, 1],
+        # 4:3 (w:h) aspect ratio;
+        default=[100, 130, 1],
+    )
+    parser.add_argument(
+        "--channel_index",
+        help="applicable IFF input shape has channel count of 1",
+        type=int,
+        # 4:3 (w:h) aspect ratio;
+        default=0,
     )
     parser.add_argument(
         "--backbone",
@@ -346,10 +382,13 @@ def main():
 
     regularize_data = True
     dataset = setup_dataset(
-        (new_input_shape[0], new_input_shape[1]),
-        os.path.expanduser(args.images),
-        args.batch_size,
-        regularize_data,
+        image_shape=new_input_shape,
+        image_directory=os.path.expanduser(args.images),
+        batch_size=args.batch_size,
+        regularize=regularize_data,
+        augment=True,
+        seed=135
+        # channel_index=args.channel_index,
     )
 
     max_images_to_draw = 40
