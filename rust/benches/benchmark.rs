@@ -9,6 +9,9 @@ use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunn
 #[cfg(feature = "tflite")]
 use crate::nn_backend_test::nn_runners::TfLiteRunner;
 
+// TODO find a configuration based approach to load all the possible cases and benchmark! these hardcoded paths are messy.
+
+
 const CLASSIFIER_PATH: &str = "../models/hulks_2022/classifier_updated.hdf5";
 const MULTI_CLASSIFIER_PATH: &str = "../models/hulks_2022/classifier_multiclass.hdf5";
 const CLASSIFIER_PATH_ONNX: &str = "../models/hulks_2022/classifier.onnx";
@@ -78,36 +81,36 @@ fn criterion_benchmark(c: &mut Criterion) {
             )
         },
     );
-
-    group.bench_with_input(
-        BenchmarkId::new("TractOnnxRunner", "semseg"),
-        &semseg_image,
-        |b, image| {
-            b.iter_batched_ref(
-                || -> (TractOnnxRunner, Vec<f32>) {
-                    (
-                        TractOnnxRunner::new(
-                            SEMANTIC_SEGMENTATION_DEEPLAB_ONNX,
-                            &deeplab_input_shape,
-                        )
-                        .unwrap(),
-                        image
-                            .resize_exact(
-                                deeplab_input_shape[1] as u32,
-                                deeplab_input_shape[2] as u32,
-                                imageops::Triangle,
-                            )
-                            .as_bytes()
-                            .iter()
-                            .map(|p| *p as f32)
-                            .collect_vec(),
-                    )
-                },
-                |(runner, input_buffer)| runner.run_inference_single_io(input_buffer).len(),
-                BatchSize::SmallInput,
-            )
-        },
-    );
+    // TODO add the models
+    // group.bench_with_input(
+    //     BenchmarkId::new("TractOnnxRunner", "semseg"),
+    //     &semseg_image,
+    //     |b, image| {
+    //         b.iter_batched_ref(
+    //             || -> (TractOnnxRunner, Vec<f32>) {
+    //                 (
+    //                     TractOnnxRunner::new(
+    //                         SEMANTIC_SEGMENTATION_DEEPLAB_ONNX,
+    //                         &deeplab_input_shape,
+    //                     )
+    //                     .unwrap(),
+    //                     image
+    //                         .resize_exact(
+    //                             deeplab_input_shape[1] as u32,
+    //                             deeplab_input_shape[2] as u32,
+    //                             imageops::Triangle,
+    //                         )
+    //                         .as_bytes()
+    //                         .iter()
+    //                         .map(|p| *p as f32)
+    //                         .collect_vec(),
+    //                 )
+    //             },
+    //             |(runner, input_buffer)| runner.run_inference_single_io(input_buffer).len(),
+    //             BatchSize::SmallInput,
+    //         )
+    //     },
+    // );
 
     cfg_if::cfg_if! {
         if #[cfg(feature="tflite")] {
@@ -124,32 +127,32 @@ fn criterion_benchmark(c: &mut Criterion) {
                     )
                 },
             );
-
-            group.bench_with_input(
-                BenchmarkId::new("TfLiteRunner Deeplab", _SEMSEG_SAMPLE_PATH),
-                &semseg_image,
-                |b, image| {
-                    b.iter_batched_ref(
-                        || -> (TfLiteRunner,Vec<f32>) {
-                            (
-                                TfLiteRunner::new(_SEMANTIC_SEGMENTATION_DEEPLABL_TFLITE, _thread_count).unwrap(),
-                                image
-                                .resize_exact(
-                                    deeplab_input_shape[1] as u32,
-                                    deeplab_input_shape[2] as u32,
-                                    imageops::Triangle,
-                                )
-                                .as_bytes()
-                                .iter()
-                                .map(|p| *p as f32)
-                                .collect_vec(),
-                            )
-                        },
-                        |(runner, input_buffer)| runner.run_inference_single_io(input_buffer).len(),
-                        BatchSize::SmallInput,
-                    )
-                },
-            );
+            // TODO add the models
+            // group.bench_with_input(
+            //     BenchmarkId::new("TfLiteRunner Deeplab", _SEMSEG_SAMPLE_PATH),
+            //     &semseg_image,
+            //     |b, image| {
+            //         b.iter_batched_ref(
+            //             || -> (TfLiteRunner,Vec<f32>) {
+            //                 (
+            //                     TfLiteRunner::new(_SEMANTIC_SEGMENTATION_DEEPLABL_TFLITE, _thread_count).unwrap(),
+            //                     image
+            //                     .resize_exact(
+            //                         deeplab_input_shape[1] as u32,
+            //                         deeplab_input_shape[2] as u32,
+            //                         imageops::Triangle,
+            //                     )
+            //                     .as_bytes()
+            //                     .iter()
+            //                     .map(|p| *p as f32)
+            //                     .collect_vec(),
+            //                 )
+            //             },
+            //             |(runner, input_buffer)| runner.run_inference_single_io(input_buffer).len(),
+            //             BatchSize::SmallInput,
+            //         )
+            //     },
+            // );
         }
     }
 
