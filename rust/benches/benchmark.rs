@@ -12,6 +12,7 @@ use crate::nn_backend_test::nn_runners::TfLiteRunner;
 
 // TODO find a configuration based approach to load all the possible cases and benchmark! these hardcoded paths are messy.
 
+#[derive(Debug)]
 enum Runtimes {
     OnnxTract,
     Torch,
@@ -20,6 +21,7 @@ enum Runtimes {
     CompiledNN,
 }
 
+#[derive(Debug)]
 enum ModelTypes {
     HulksBallModel,
     HulksMultiClassifier,
@@ -49,23 +51,23 @@ fn get_bench_combos() -> Vec<(Runtimes, ModelTypes, Box<InputAndShapeFn>, &'stat
             Box::new(ball_data),
             "../models/hulks_2022/classifier.onnx",
         ),
-        (
-            Runtimes::OnnxTract,
-            ModelTypes::SemsegDeeplab,
-            Box::new(semseg_data),
-            "../models/semantic_segmentation/lite-model_deeplabv3_1_metadata_2_converted.onnx",
-        ),
+        // (
+        //     Runtimes::OnnxTract,
+        //     ModelTypes::SemsegDeeplab,
+        //     Box::new(semseg_data),
+        //     "../models/semantic_segmentation/lite-model_deeplabv3_1_metadata_2_converted.onnx",
+        // ),
         // (
         //     Runtimes::TfLite,
         //     ModelTypes::HulksBallModel,
         //     "../models/hulks_2022/classifier.tflite",
         // ),
-        (
-            Runtimes::OnnxTract,
-            ModelTypes::YoloV8,
-            Box::new(yolo_v8_data),
-            "../models/yolo/yolov8n.onnx",
-        ),
+        // (
+        //     Runtimes::OnnxTract,
+        //     ModelTypes::YoloV8,
+        //     Box::new(yolo_v8_data),
+        //     "../models/yolo/yolov8n.onnx",
+        // ),
         (
             Runtimes::Torch,
             ModelTypes::YoloV8,
@@ -110,7 +112,7 @@ fn semseg_data() -> (Vec<f32>, Vec<u32>) {
 
 fn yolo_v8_data() -> (Vec<f32>, Vec<u32>) {
     // TODO check channel order
-    let yolo_v8_shape = [1, 3, 64, 64];
+    let yolo_v8_shape = [1, 3, 640, 640];
     // open image, resize it and make a Tensor out of it
     let semseg_image =
         image::open("../data/01024_GermanOpen2019_HULKs_Sabretooth-2nd_52240197_upper-002.png")
@@ -118,8 +120,8 @@ fn yolo_v8_data() -> (Vec<f32>, Vec<u32>) {
 
     let buffer = semseg_image
         .resize_exact(
-            yolo_v8_shape[1] as u32,
             yolo_v8_shape[2] as u32,
+            yolo_v8_shape[3] as u32,
             imageops::Triangle,
         )
         .as_bytes()
@@ -139,12 +141,15 @@ fn criterion_benchmark(c: &mut Criterion) {
         let (input_buffer, input_shape) = input_provider();
 
         group.bench_with_input(
-            BenchmarkId::new("CompiledNNRunner", "ball (single class)"),
+            BenchmarkId::new(
+                format!("model type: {:?}", model_type),
+                format!("Runtime: {:?}", runtime),
+            ),
             &input_buffer,
-            |b, ball_input_buffer| {
+            |b, input_buffer| {
                 b.iter_batched_ref(
                     || -> Box<dyn Runner> { get_runtime(&runtime, model_path, &input_shape) },
-                    |runner| runner.run_inference_single_io(ball_input_buffer).len(),
+                    |runner| runner.run_inference_single_io(input_buffer).len(),
                     BatchSize::SmallInput,
                 )
             },
@@ -168,7 +173,17 @@ fn get_runtime(runtime: &Runtimes, model_path: &str, input_shape: &Vec<u32>) -> 
             )
             .unwrap(),
         ),
-        Runtimes::Torch => Box::new(TorchRunner::new(&model_path).unwrap()),
+        Runtimes::Torch => Box::new(
+            TorchRunner::new(
+                &model_path,
+                input_shape
+                    .iter()
+                    .map(|v| *v as usize)
+                    .collect_vec()
+                    .as_slice(),
+            )
+            .unwrap(),
+        ),
         Runtimes::TfLite => todo!(),
         Runtimes::Tf => todo!(),
     }
