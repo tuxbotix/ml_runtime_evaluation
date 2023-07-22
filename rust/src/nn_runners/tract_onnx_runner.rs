@@ -37,7 +37,7 @@ impl TractOnnxRunner {
 
         // Resize
         let output_len = model
-            .model
+            .model()
             .output_fact(0)
             .unwrap()
             .shape
@@ -49,7 +49,7 @@ impl TractOnnxRunner {
             .unwrap();
 
         let input_shape_computed = model
-            .model
+            .model()
             .input_fact(0)
             .unwrap()
             .shape
@@ -108,7 +108,7 @@ impl Runner for TractOnnxRunner {
 
     fn get_input_shape(&self, index: usize) -> Vec<usize> {
         self.model
-            .model
+            .model()
             .input_fact(index)
             .unwrap()
             .shape
@@ -121,7 +121,7 @@ impl Runner for TractOnnxRunner {
 
     fn get_output_shape(&self, index: usize) -> Vec<usize> {
         self.model
-            .model
+            .model()
             .output_fact(index)
             .unwrap()
             .shape

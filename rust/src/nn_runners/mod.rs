@@ -1,10 +1,12 @@
 mod compiled_nn_runner;
 mod onnx_runtime_runner;
 mod runner_traits;
+mod torch_runner;
 mod tract_onnx_runner;
 
 pub use compiled_nn_runner::CompiledNNRunner;
 pub use runner_traits::Runner;
+pub use torch_runner::TorchRunner;
 pub use tract_onnx_runner::TractOnnxRunner;
 
 // tflitec library has issues with cross compiling via Bazel right now.

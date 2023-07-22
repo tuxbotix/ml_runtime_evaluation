@@ -4,36 +4,32 @@ name = "nn_backend_test"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = "1.0.56"
 cfg-if = "1.0.0"
 image = "0.24.1"
-itertools = "0.10.5"
-
+itertools = "0.11.0"
+# Torch
+tch = { version = "0.13.0", features = ["download-libtorch"] }
 # Tract
-tract-core = "^0.19.2"
-tract-onnx = "^0.19.2"
+tract-core = "^0.20.7"
+tract-onnx = "^0.20.7"
 # tract = "0.16.7"
-tract-tensorflow = "^0.19.2"
-
+tract-tensorflow = "^0.20.7"
 #compiledNN
 compiled-nn = "^0.12.0"
-
 #ONNX Runtime
 # mcai-onnxruntime = "0.0.15"
-
 # Apache TVM
 # tvm-rt = { git = "https://github.com/apache/tvm/", branch="main"}
 # tvm-sys = { git = "https://github.com/apache/tvm/", branch="main"}
-
 # Tensorflow Lite
-tflitec = {version = "^0.5.2", optional = true, features = ["xnnpack"]}
+tflitec = { version = "^0.6.0", optional = true, features = ["xnnpack"] }
 
 [dev-dependencies]
-criterion = "0.4"
+criterion = "^0.5.1"
 # plotters = "0.3.3"
-pprof = {version = "0.11", features = ["flamegraph", "criterion"]}
+pprof = { version = "^0.12.0", features = ["flamegraph", "criterion"] }
 
 [features]
 default = []

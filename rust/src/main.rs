@@ -5,7 +5,7 @@ use std::{
 };
 
 extern crate nn_backend_test;
-use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TractOnnxRunner};
+use crate::nn_backend_test::nn_runners::{CompiledNNRunner, Runner, TorchRunner, TractOnnxRunner};
 
 #[cfg(feature = "tflite")]
 use crate::nn_backend_test::nn_runners::TfLiteRunner;
