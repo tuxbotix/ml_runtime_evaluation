@@ -1,0 +1,5 @@
+torch==2.0.1
+opencv-python
+apache-tvm
+onnx2torch
+ultralytics
