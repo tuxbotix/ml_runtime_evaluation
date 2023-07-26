@@ -3,3 +3,5 @@ opencv-python
 apache-tvm
 onnx2torch
 ultralytics
+# TVMC uses xgboost but not the latest (1.7*)
+xgboost~=1.5.0

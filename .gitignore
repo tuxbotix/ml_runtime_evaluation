@@ -1,2 +1,9 @@
 .vscode/
 .venv
+
+compile_commands.json
+
+__pycache__
+*.egg
+
+generated*
